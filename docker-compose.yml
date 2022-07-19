@@ -10,6 +10,9 @@ services:
       - 4000:1666
     volumes:
       - ./volumes/p4d-home:/p4
+      - ./volumes/p4-ssl:/p4-ssl
+    environment:
+      - P4SSLDIR=/p4-ssl
     tty: true
 
   build.helix:
@@ -22,6 +25,10 @@ services:
       - 4001:1666
     depends_on:
       - p4d.helix
+    volumes:
+      - ./volumes/p4-ssl:/p4-ssl
+    environment:
+      - P4SSLDIR=/p4-ssl
     tty: true
 
   swarm.helix:
@@ -34,17 +41,25 @@ services:
       - 5080:80
     depends_on:
       - build.helix
+    volumes:
+      - ./volumes/p4-ssl:/p4-ssl
+    environment:
+      - P4SSLDIR=/p4-ssl
     tty: true
 
-  search.helix:
-    build:
-      context: p4-search
-      dockerfile: Dockerfile
-    hostname: search
-    domainname: helix
-    ports:
-      - 4088:8088
-      - 8983:8983
-    depends_on:
-      - p4d.helix
-    tty: true
+  # search.helix:
+  #   build:
+  #     context: p4-search
+  #     dockerfile: Dockerfile
+  #   hostname: search
+  #   domainname: helix
+  #   ports:
+  #     - 4088:8088
+  #     - 8983:8983
+  #   depends_on:
+  #     - p4d.helix
+  #   volumes:
+  #     - ./volumes/p4-ssl:/p4-ssl4
+  #   environment:
+  #     - P4SSLDIR=/p4-ssl
+  #   tty: true

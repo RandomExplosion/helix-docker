@@ -25,7 +25,7 @@ ARG P4TCP=1666
 ARG P4USER=super
 ARG P4PASSWD=Passw0rd
 ARG P4CASE=-C0
-ARG P4CHARSET=utf8
+ARG P4CHARSET=utf8x
 
 # Dynamic Environment
 ENV P4NAME=$P4NAME \
@@ -40,6 +40,7 @@ ENV P4NAME=$P4NAME \
 # Base Environment
 ENV P4HOME=/p4
 ENV P4LOGDIR=$P4HOME/log
+ENV P4SSLDIR=$P4HOME/ssl
 
 # Derived Environment
 ENV P4ROOT=$P4HOME/root \
@@ -71,10 +72,26 @@ RUN \
   chmod +x /usr/local/bin/init.sh && \
   chmod +x /usr/local/bin/latest_checkpoint.sh
 
+# Configure SSL
+RUN \
+  # Directory init
+  mkdir -p $P4HOME/root && \
+  mkdir -p $P4SSLDIR && \
+  # Set the ssl folder as read-write for us only
+  chmod 0500 $P4SSLDIR && \
+
+  # Generate a public and private key pair
+  p4d -Gc P4SSLDIR=$P4SSLDIR && \ 
+  # Generate a fingerprint
+  p4d -Gf P4SSLDIR=$P4SSLDIR && \
+
+  # Set the certificate files as read-write-execute
+  chmod 0400 $P4SSLDIR/**
+
 # Expose Perforce; TCP port and volumes
 EXPOSE $P4TCP
 VOLUME $P4HOME
-
+VOLUME $P4SSLDIR
 
 # --------------------------------------------------------------------------------
 # Docker RUN
